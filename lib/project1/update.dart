@@ -1,31 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class AddUser extends StatefulWidget {
-  const AddUser({super.key});
+class UpdateDonor extends StatefulWidget {
+  const UpdateDonor({super.key});
 
   @override
-  State<AddUser> createState() => _AddUserState();
+  State<UpdateDonor> createState() => _UpdateDonorState();
 }
 
-class _AddUserState extends State<AddUser> {
+class _UpdateDonorState extends State<UpdateDonor> {
 
 final bloodGroups = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
 String ? selectedGroup;
 final CollectionReference donor = FirebaseFirestore.instance.collection('donor');
 TextEditingController donorName = TextEditingController();
 TextEditingController donorPhone = TextEditingController();
- 
- void addDonor(){
+
+ void updateDonor(docId){
   final data = {
-    'Name':donorName.text, 'Phone':donorPhone.text,'group': selectedGroup };
-     donor.add(data);
+    'Name':donorName.text,
+    'Phone':donorPhone.text,
+    'group':selectedGroup
+  };
+  donor.doc(docId).update(data).then((value) => Navigator.pop(context));
  }
+
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    donorName.text = args['Name'];
+    donorPhone.text = args['Phone'];
+    selectedGroup = args['group'];
+    final docId = args['id'];
+
     return Scaffold(
       appBar: AppBar(
-        title:Text("Add Doners") ,
+        title:Text("Update Doners") ,
         backgroundColor: Colors.red,
       ),
       body:Padding(
@@ -53,6 +63,7 @@ TextEditingController donorPhone = TextEditingController();
                  Padding(
                    padding: const EdgeInsets.all(8.0),
                    child: DropdownButtonFormField(
+                    value: selectedGroup,
                     decoration: InputDecoration(
                       label: Text("Select Blood Group")
                     ),
@@ -66,14 +77,13 @@ TextEditingController donorPhone = TextEditingController();
                  ),
                  ElevatedButton(
                   onPressed: (){
-                    addDonor();
-                    Navigator.pop(context);
+                  updateDonor(docId);
                   },
                   style:ButtonStyle(
                     minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
                     backgroundColor: MaterialStateProperty.all(Colors.red),
                   ) ,
-                   child: Text("Submit",style:TextStyle(fontSize: 20) ,)),
+                   child: Text("Update",style:TextStyle(fontSize: 20) ,)),
           ],
         ),
       ) ,
